@@ -1,109 +1,26 @@
-import java.util.List;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 public class App {
-    private static final Scanner scanner = new Scanner(System.in);
-    private static final ContactManager manager = new ContactManager();
-
-    public static void main(String[] args) {
-        boolean running = true;
-        while (running) {
-            System.out.println("\n--- Contact Manager ---");
-            System.out.println("1. Add Contact");
-            System.out.println("2. View Contacts");
-            System.out.println("3. Search Contact");
-            System.out.println("4. Delete Contact");
-            System.out.println("5. Exit");
-            System.out.print("Choose an option: ");
-
-            String choice = scanner.nextLine();
-            switch (choice) {
-                case "1":
-                    addContact();
-                    break;
-                case "2":
-                    viewContacts();
-                    break;
-                case "3":
-                    searchContact();
-                    break;
-                case "4":
-                    deleteContact();
-                    break;
-                case "5":
-                    System.out.println("Exiting...");
-                    running = false;
-                    break;
-                default:
-                    System.out.println("Invalid option. Please try again.");
-            }
-        }
-    }
-
-    private static void addContact() {
-        System.out.print("Enter Name: ");
-        String name = scanner.nextLine().trim();
-        System.out.print("Enter Phone Number: ");
-        String phone = scanner.nextLine().trim();
-
-        if (name.isEmpty() || phone.isEmpty()) {
-            System.out.println("Name and phone number cannot be empty.");
-            return;
-        }
-
-        Contact contact = new Contact(name, phone);
-        if (manager.addContact(contact)) {
-            System.out.println("Contact added successfully.");
-        } else {
-            System.out.println("Error: Phone number already exists or failed to save.");
-        }
-    }
-
-    private static void viewContacts() {
-        System.out.println("\n--- Saved Contacts ---");
-        List<Contact> contacts = manager.getAllContacts();
-        if (contacts.isEmpty()) {
-            System.out.println("No contacts found.");
-        } else {
-            for (Contact contact : contacts) {
-                System.out.println(contact);
-            }
-        }
-    }
-
-    private static void searchContact() {
-        System.out.print("Enter name or phone number to search: ");
-        String keyword = scanner.nextLine().trim();
-
-        if (keyword.isEmpty()) {
-            System.out.println("Search keyword cannot be empty.");
-            return;
-        }
-
-        System.out.println("\n--- Search Results ---");
-        List<Contact> results = manager.searchContact(keyword);
-        if (results.isEmpty()) {
-            System.out.println("No matching contacts found.");
-        } else {
-            for (Contact contact : results) {
-                System.out.println(contact);
-            }
-        }
-    }
-
-    private static void deleteContact() {
-        System.out.print("Enter the exact name or phone number of the contact to delete: ");
-        String keyword = scanner.nextLine().trim();
-
-        if (keyword.isEmpty()) {
-            System.out.println("Input cannot be empty.");
-            return;
-        }
-
-        if (manager.deleteContact(keyword)) {
-            System.out.println("Contact deleted successfully.");
-        } else {
-            System.out.println("Contact not found or deletion failed.");
+    public static void main(String[] args) throws Exception {
+        Scanner s = new Scanner(System.in);
+        File f = new File("phone.txt");
+        f.createNewFile(); // Ensure file exists
+        while (true) {
+            System.out.print("\n1.Add 2.View 3.Search 4.Delete 5.Exit -> ");
+            String c = s.nextLine(), k, l;
+            List<String> lines = new ArrayList<>();
+            try (BufferedReader r = new BufferedReader(new FileReader(f))) { while ((l = r.readLine()) != null) lines.add(l); }
+            if (c.equals("1")) {
+                System.out.print("Format (Name - Phone): ");
+                try (FileWriter w = new FileWriter(f, true)) { w.write(s.nextLine() + "\n"); }
+            } else if (c.equals("2")) {
+                lines.forEach(System.out::println);
+            } else if (c.equals("3") || c.equals("4")) {
+                System.out.print("Keyword: "); k = s.nextLine().toLowerCase();
+                if (c.equals("3")) lines.stream().filter(x -> x.toLowerCase().contains(k)).forEach(System.out::println);
+                else try (FileWriter w = new FileWriter(f)) { for (String x : lines) if (!x.toLowerCase().contains(k)) w.write(x + "\n"); }
+            } else break;
         }
     }
 }
