@@ -1,1 +1,3 @@
 *.class
+bin/
+java-simple-contact/bin/
